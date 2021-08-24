@@ -1,0 +1,7 @@
+{
+  "name": "desserts_trilogy_user",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
