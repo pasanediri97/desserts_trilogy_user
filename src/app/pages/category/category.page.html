@@ -1,0 +1,65 @@
+<ion-content #content>
+  <div class="mainContent">
+    <div class="restContent" [style.backgroundImage]="'url('+cover+')'">
+      <div class="btnss"> 
+       
+      </div>
+    </div>
+    <div class="foodsContent">
+      <ion-label class="restname">{{name}}</ion-label>
+      <ion-label class="cusine">{{getCusine(cusine)}}</ion-label>
+      <div class="vegSection"> 
+      </div>
+      <div *ngFor="let item of dummy">
+        <ion-list>
+          <ion-item>
+            <ion-thumbnail slot="start">
+              <ion-skeleton-text animated></ion-skeleton-text>
+            </ion-thumbnail>
+            <ion-label>
+              <h3>
+                <ion-skeleton-text animated style="width: 50%"></ion-skeleton-text>
+              </h3>
+              <p>
+                <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
+              </p>
+              <p>
+                <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+      <div *ngFor="let cate of categories">
+        <ion-label class="cateTitle" [id]="cate.id">{{cate.name}}</ion-label>
+        <div class="card_div">
+
+          <div class="card" *ngFor="let item of foods;let i = index">
+            <div *ngIf="cate.id == item.cid.id" class="mainCat">
+              <img [src]="item.cover" alt="" class="image_div">
+              <div class="desc_div">
+                <ion-label class="heading_lbl">{{item.name}}</ion-label>
+                <ion-label class="small_lbl">{{item.desc}}</ion-label>
+                <ion-label class="small_lbl">{{getCurrency()}} {{item.price}}</ion-label>
+              </div>
+              <div class="cartBtn" *ngIf="item.quantiy <= 0">
+                <ion-label class="btns" (click)="add(i)">Add</ion-label>
+                <!-- <ion-button (click)="add(i)" size="small" expand="block" fill="outline" shape="round">
+                  {{'Add' | translate}}
+                </ion-button> -->
+              </div>
+              <div class="cartBtn2" *ngIf="item.quantiy > 0">
+                <ion-button (click)="removeQ(i)" fill="clear" size="small">
+                  <ion-icon name="remove"></ion-icon>
+                </ion-button>
+                <p class="qunitity">{{item.quantiy}}</p>
+                <ion-button (click)="addQ(i)" fill="clear" size="small">
+                  <ion-icon name="add"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
