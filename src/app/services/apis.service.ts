@@ -26,6 +26,28 @@ export class ApisService {
     private http: HttpClient
   ) { }
 
+  public checkAuth() {
+    return new Promise((resolve, reject) => {
+      this.fireAuth.auth.onAuthStateChanged(user => {
+        console.log(user);
+        if (user) {
+          localStorage.setItem('uid', user.uid);
+          resolve(user);
+        } else {
+          // this.logout();
+          const lng = localStorage.getItem('language');
+          const selectedCity = localStorage.getItem('selectedCity');
+          localStorage.clear();
+          localStorage.setItem('language', lng);
+          localStorage.setItem('selectedCity', selectedCity);
+          resolve(false);
+        }
+      });
+    });
+  }
+  
+  
+
   public getVenueDetails(id): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this.adb.collection('venue').doc(id).get().subscribe((venue: any) => {

@@ -1,9 +1,12 @@
+import { VariationsPage } from './../variations/variations.page';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NavigationExtras } from '@angular/router';
+import { AlertController, PopoverController, ModalController } from '@ionic/angular';
 import { NavController} from '@ionic/angular';
 import { ApisService } from 'src/app/services/apis.service';
 import { UtilService } from 'src/app/services/util.service';
 import { Router } from '@angular/router'; 
+import { MenuComponent } from 'src/app/components/menu/menu.component';
 
 @Component({
   selector: 'app-category',
@@ -26,6 +29,7 @@ export class CategoryPage implements OnInit {
   dummyFoods: any[] = [];
   categories: any[] = [];
   dummy = Array(50); 
+  veg: boolean = true;
   totalItem: any = 0;
   totalPrice: any = 0;
   deliveryAddress: any = '';
@@ -35,7 +39,10 @@ export class CategoryPage implements OnInit {
     private api: ApisService,
     private util: UtilService,
     private navCtrl: NavController, 
+    private alertController: AlertController,
     private router: Router, 
+    private popoverController: PopoverController,
+    private modalCtrl: ModalController
   ) { }
 
   ngOnInit() {
@@ -168,6 +175,31 @@ export class CategoryPage implements OnInit {
     return cusine.join('-');
   }
 
+  add(index) {
+    this.api.checkAuth().then((user) => {
+      if (user) {
+        const vid = localStorage.getItem('vid');
+        if (vid && vid !== this.id) {
+          this.presentAlertConfirm();
+          return false;
+        }
+        if (this.foods[index].variations && this.foods[index].variations.length) {
+          console.log('open modal');
+          this.openVariations(index);
+        } else {
+          this.foods[index].quantiy = 1;
+          this.calculate();
+        }
+      } else {
+        this.router.navigate(['login']);
+      }
+    }).catch(error => {
+      console.log(error);
+    });
+
+
+  }
+
   async setData() {
     const vid = localStorage.getItem('vid');
     console.log('leaving the planet', vid, this.id);
@@ -207,5 +239,210 @@ export class CategoryPage implements OnInit {
 
   getCurrency() {
     return this.util.getCurrecySymbol();
+  }
+
+  changeStatus() {
+    this.foods = this.dummyFoods.filter(x => x.veg === this.veg);
+  }
+
+  statusChange() {
+    console.log('status', this.veg);
+    this.changeStatus();
+  }
+
+  calculate() {
+    // this.dummy = [];
+    // console.log('khaliiii', this.dummy);
+    // console.log(this.foods);
+    // let item = this.foods.filter(x => x.quantiy > 0);
+    // console.log(item);
+    // this.totalPrice = 0;
+    // this.totalItem = 0;
+    // item.forEach(element => {
+    //   this.totalItem = this.totalItem + element.quantiy;
+    //   this.totalPrice = this.totalPrice + (parseFloat(element.price) * parseInt(element.quantiy));
+    // });
+    // this.totalPrice = parseFloat(this.totalPrice).toFixed(2);
+    // console.log('total item', this.totalItem);
+    // if (this.totalItem === 0) {
+    //   this.totalItem = 0;
+    //   this.totalPrice = 0;
+    // }
+    this.dummy = [];
+    console.log('khaliiii', this.dummy);
+    console.log(this.foods);
+    let item = this.foods.filter(x => x.quantiy > 0);
+    this.foods.forEach(element => {
+      if (element.quantiy === 0) {
+        element.selectedItem = [];
+      }
+    });
+    console.log('item=====>>', item);
+    this.totalPrice = 0;
+    this.totalItem = 0;
+    this.cart = [];
+    console.log('cart emplth', this.cart, item);
+    item.forEach(element => {
+      this.totalItem = this.totalItem + element.quantiy;
+      console.log('itemsss----->>>', element);
+      if (element && element.selectedItem && element.selectedItem.length > 0) {
+        let subPrice = 0;
+        element.selectedItem.forEach(subItems => {
+          subItems.item.forEach(realsItems => {
+            subPrice = subPrice + (realsItems.value);
+          });
+          subPrice = subPrice * subItems.total;
+        });
+        this.totalPrice = this.totalPrice + subPrice;
+        // this.totalPrice = this.totalPrice + (subPrice * parseInt(element.quantiy));
+      } else {
+        this.totalPrice = this.totalPrice + (parseFloat(element.price) * parseInt(element.quantiy));
+      }
+      this.cart.push(element);
+    });
+    localStorage.removeItem('userCart');
+    console.log('carrrrrrr---->>>', this.cart);
+    localStorage.setItem('userCart', JSON.stringify(this.cart));
+    this.totalPrice = parseFloat(this.totalPrice).toFixed(2);
+    console.log('total item', this.totalItem);
+    if (this.totalItem === 0) {
+      this.totalItem = 0;
+      this.totalPrice = 0;
+    }
+  }
+
+  async openVariations(index) {
+    const modal = await this.modalCtrl.create({
+      component: VariationsPage,
+      cssClass: 'custom_modal2',
+      componentProps: {
+        name: this.name,
+        food: this.foods[index]
+      }
+    });
+    modal.onDidDismiss().then((data) => {
+      console.log('from variations', data.data);
+      console.log('data.data', data.role);
+      let isValid = false;
+      if (data.role === 'new') {
+        this.foods[index].quantiy = 1;
+        const carts = {
+          item: data.data,
+          total: 1
+        };
+        this.foods[index].selectedItem.push(carts);
+        isValid = true;
+      } else if (data.role === 'sameChoice') {
+        this.foods[index].selectedItem = data.data;
+        this.foods[index].quantiy = this.foods[index].selectedItem.length;
+        isValid = true;
+      } else if (data.role === 'newCustom') {
+        const carts = {
+          item: data.data,
+          total: 1
+        };
+        this.foods[index].selectedItem.push(carts);
+        this.foods[index].quantiy = this.foods[index].quantiy + 1;
+        isValid = true;
+      } else if (data.role === 'remove') {
+        console.log('number', data.data);
+        this.foods[index].quantiy = 0;
+        this.foods[index].selectedItem = [];
+        isValid = true;
+      } else {
+        console.log('empy');
+      }
+      if (isValid) {
+        console.log('isValid', isValid);
+        this.calculate();
+      }
+    });
+    return await modal.present();
+  }
+
+  addQ(index) {
+    console.log('foooduieeeee===========>>', this.foods[index]);
+    if (this.foods[index].variations && this.foods[index].variations.length) {
+      this.openVariations(index);
+    } else {
+      this.foods[index].quantiy = this.foods[index].quantiy + 1;
+      this.calculate();
+    }
+  }
+
+  removeQ(index) {
+    if (this.foods[index].quantiy !== 0) {
+      if (this.foods[index].quantiy >= 1 && !this.foods[index].size) {
+        this.foods[index].quantiy = this.foods[index].quantiy - 1;
+      } else {
+        this.openVariations(index);
+      }
+    } else {
+      this.foods[index].quantiy = 0;
+    }
+    this.calculate();
+  }
+
+  async presentAlertConfirm() {
+    const alert = await this.alertController.create({
+      header: this.util.translate('Warning'),
+      message: this.util.translate(`you already have item's in cart with different restaurant`),
+      buttons: [
+        {
+          text: this.util.translate('Cancel'),
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel: blah');
+          }
+        }, {
+          text: this.util.translate('Clear cart'),
+          handler: () => {
+            console.log('Confirm Okay');
+            localStorage.removeItem('vid');
+            this.dummy = Array(10);
+            localStorage.removeItem('categories');
+            localStorage.removeItem('dummyItem');
+            localStorage.removeItem('foods');
+            this.totalItem = 0;
+            this.totalPrice = 0;
+            this.getCates();
+            this.getFoods();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  async presentPopover(ev: any) {
+    if (this.categories.length <= 0) {
+      return false;
+    }
+    const popover = await this.popoverController.create({
+      component: MenuComponent,
+      event: ev,
+      componentProps: { data: this.categories },
+      mode: 'ios',
+    });
+    popover.onDidDismiss().then(data => {
+      console.log(data.data);
+      if (data && data.data) {
+        const yOffset = document.getElementById(data.data.id).offsetTop;
+        const yHOffset = document.getElementById(data.data.id).offsetHeight;
+
+        console.log(yOffset + ' : ' + yHOffset);
+        this.content.scrollToPoint(0, yOffset, 1000);
+      }
+    });
+    await popover.present();
+
+  }
+
+  viewCart() {
+    console.log('viewCart');
+    this.setData();
+    this.navCtrl.navigateRoot(['tabs/tab3']);
   }
 }
