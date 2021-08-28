@@ -22,6 +22,13 @@ const routes: Routes = [
       },
       {
         path: 'tab3',
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import('../cart/cart.module').then(m => m.CartPageModule)
+          }
+        ]
       },
       {
         path: 'tab4',

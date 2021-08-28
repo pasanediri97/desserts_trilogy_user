@@ -1,14 +1,35 @@
 <ion-content #content>
   <div class="mainContent">
     <div class="restContent" [style.backgroundImage]="'url('+cover+')'">
-      <div class="btnss"> 
-       
+      <div class="btnss">
+        <ion-icon (click)="back()" class="backIcon" color="light" slot="start" name="arrow-back-outline"></ion-icon>
+        <ion-label class="moreInfo" (click)="openDetails()">{{'View more' | translate}}</ion-label>
       </div>
     </div>
     <div class="foodsContent">
       <ion-label class="restname">{{name}}</ion-label>
       <ion-label class="cusine">{{getCusine(cusine)}}</ion-label>
-      <div class="vegSection"> 
+      <div class="ratting">
+        <ion-icon [name]="totalRatting >= 1 ? 'star-outline':'star'" [color]="totalRatting >= 1 ? 'warning':'medium'">
+        </ion-icon>
+        <ion-icon [name]="totalRatting >= 2 ? 'star-outline':'star'" [color]="totalRatting >= 2 ? 'warning':'medium'">
+        </ion-icon>
+        <ion-icon [name]="totalRatting >= 3 ? 'star-outline':'star'" [color]="totalRatting >= 3 ? 'warning':'medium'">
+        </ion-icon>
+        <ion-icon [name]="totalRatting >= 4 ? 'star-outline':'star'" [color]="totalRatting >= 4 ? 'warning':'medium'">
+        </ion-icon>
+        <ion-icon [name]="totalRatting >= 5 ? 'star-outline':'star'" [color]="totalRatting >= 5 ? 'warning':'medium'">
+        </ion-icon>
+        ({{ratting}} {{'Rattings' | translate}})
+      </div>
+      <div class="deliveryAddress">
+        <img src="assets/pin.png" alt="" class="pin">
+        <p class="address"> {{getAddress()}}</p>
+
+      </div>
+      <div class="vegSection">
+        <ion-label>{{'Veg Only' | translate}}</ion-label>
+        <ion-toggle color="success" mode="ios" (ionChange)="statusChange()" [(ngModel)]="veg"></ion-toggle>
       </div>
       <div *ngFor="let item of dummy">
         <ion-list>
@@ -39,11 +60,29 @@
               <img [src]="item.cover" alt="" class="image_div">
               <div class="desc_div">
                 <ion-label class="heading_lbl">{{item.name}}</ion-label>
+                <div class="ratting">
+                  <ion-icon [name]="item.ratting >= 1 ? 'star-outline':'star'"
+                    [color]="item.ratting >= 1 ? 'warning':'medium'">
+                  </ion-icon>
+                  <ion-icon [name]="item.ratting >= 2 ? 'star-outline':'star'"
+                    [color]="item.ratting >= 2 ? 'warning':'medium'">
+                  </ion-icon>
+                  <ion-icon [name]="item.ratting >= 3 ? 'star-outline':'star'"
+                    [color]="item.ratting >= 3 ? 'warning':'medium'">
+                  </ion-icon>
+                  <ion-icon [name]="item.ratting >= 4 ? 'star-outline':'star'"
+                    [color]="item.ratting >= 4 ? 'warning':'medium'">
+                  </ion-icon>
+                  <ion-icon [name]="item.ratting >= 5 ? 'star-outline':'star'"
+                    [color]="item.ratting >= 5 ? 'warning':'medium'">
+                  </ion-icon>
+                  ({{item.totalRatting ? item.totalRatting:0}}. {{'Rattings' | translate}})
+                </div>
                 <ion-label class="small_lbl">{{item.desc}}</ion-label>
                 <ion-label class="small_lbl">{{getCurrency()}} {{item.price}}</ion-label>
               </div>
               <div class="cartBtn" *ngIf="item.quantiy <= 0">
-                <ion-label class="btns" (click)="add(i)">Add</ion-label>
+                <ion-label class="btns" (click)="add(i)">{{'Add' | translate}}</ion-label>
                 <!-- <ion-button (click)="add(i)" size="small" expand="block" fill="outline" shape="round">
                   {{'Add' | translate}}
                 </ion-button> -->
@@ -63,3 +102,23 @@
       </div>
     </div>
   </div>
+
+  <!-- <app-popover></app-popover> -->
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" (click)="presentPopover($event)">
+    <ion-fab-button color="light" mode="ios">
+      <ion-icon name="list" color="primary"></ion-icon>
+      <ion-label color="primary">{{'Menu' | translate}}</ion-label>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
+<ion-footer *ngIf="totalItem >0">
+  <ion-toolbar color="primary">
+    <ion-label color="light">{{totalItem}} {{'ITEM' | translate}}</ion-label>
+    <ion-label color="light"> {{getCurrency()}} {{totalPrice}} {{'plus taxes' | translate}}</ion-label>
+    <ion-button (click)="viewCart()" slot="end" fill="clear" color="light">
+      <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+      {{'View Cart' | translate}}
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
