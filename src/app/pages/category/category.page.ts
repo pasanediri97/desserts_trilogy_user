@@ -177,22 +177,22 @@ export class CategoryPage implements OnInit {
 
   add(index) {
     this.api.checkAuth().then((user) => {
-      if (user) {
-        const vid = localStorage.getItem('vid');
-        if (vid && vid !== this.id) {
-          this.presentAlertConfirm();
-          return false;
-        }
-        if (this.foods[index].variations && this.foods[index].variations.length) {
-          console.log('open modal');
-          this.openVariations(index);
-        } else {
+      // if (user) {
+      //   const vid = localStorage.getItem('vid');
+      //   if (vid && vid !== this.id) {
+      //     this.presentAlertConfirm();
+      //     return false;
+      //   }
+        // if (this.foods[index].variations && this.foods[index].variations.length) {
+        //   console.log('open modal');
+        //   this.openVariations(index);
+        // } else {
           this.foods[index].quantiy = 1;
           this.calculate();
-        }
-      } else {
-        this.router.navigate(['login']);
-      }
+        // }
+      // } else {
+      //   this.router.navigate(['login']);
+      // }
     }).catch(error => {
       console.log(error);
     });

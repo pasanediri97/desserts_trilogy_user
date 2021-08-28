@@ -1,3 +1,4 @@
+import { VariationsPageModule } from './pages/variations/variations.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
@@ -23,6 +24,8 @@ import { OneSignal } from '@ionic-native/onesignal/ngx';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { Camera } from '@ionic-native/camera/ngx'; 
 
+import { VariationPageModule } from './pages/variation/variation.module';
+
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 export function customTranslateLoader(http: HttpClient) {
@@ -44,7 +47,9 @@ export function LanguageLoader(http: HttpClient) {
     AngularFireAuthModule,
     AngularFirestoreModule,
     AngularFireDatabaseModule, 
-    HttpClientModule,  
+    HttpClientModule,
+    VariationPageModule,
+    VariationsPageModule,  
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
